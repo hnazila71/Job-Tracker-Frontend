@@ -2,26 +2,14 @@
 
 "use client";
 
-import { useEffect, useState, FormEvent, ChangeEvent, useRef } from 'react';
+// PERBAIKAN 1: Hapus 'ChangeEvent' dari import
+import { useEffect, useState, FormEvent, useRef } from 'react';
 
-// --- Tipe data yang sama seperti sebelumnya ---
-interface JobApplication {
-  id: string;
-  company_name: string;
-  job_title: string;
-  application_date: string;
-  status: string;
-  platform?: string;
-  notes?: string;
-}
-
-// --- PERBAIKAN TIPE DATA DI SINI ---
-// Kita izinkan 'application_date' ada di dalam tipe form
+// --- Tipe data ---
+interface JobApplication { id: string; company_name: string; job_title: string; application_date: string; status: string; platform?: string; notes?: string; }
 type ApplicationFormData = Omit<JobApplication, 'id' | 'user_id'>;
 
-// --- Komponen Modal (Tidak ada perubahan) ---
-// Ganti komponen ApplicationModal yang lama dengan yang ini
-
+// --- Komponen Modal ---
 const ApplicationModal = ({ isOpen, onClose, onSubmit, initialData }: {
   isOpen: boolean;
   onClose: () => void;
@@ -29,12 +17,9 @@ const ApplicationModal = ({ isOpen, onClose, onSubmit, initialData }: {
   initialData?: JobApplication | null;
 }) => {
   const [formData, setFormData] = useState<ApplicationFormData>({
-    company_name: '', job_title: '', platform: '', status: 'Applied', notes: '',
+    company_name: '', job_title: '', platform: '', status: 'Applied', notes: '', 
     application_date: new Date().toISOString().split('T')[0]
   });
-
-  // Pindahkan daftar platform ke sini agar bisa diakses
-  const platformOptions = ['LinkedIn', 'JobStreet', 'Glints', 'Website'];
 
   useEffect(() => {
     if (initialData) {
@@ -45,18 +30,13 @@ const ApplicationModal = ({ isOpen, onClose, onSubmit, initialData }: {
         application_date: new Date(initialData.application_date).toISOString().split('T')[0]
       });
     } else {
-      // Reset form dan set platform default ke pilihan pertama
-      setFormData({ company_name: '', job_title: '', platform: 'LinkedIn', status: 'Applied', notes: '', application_date: new Date().toISOString().split('T')[0] });
+      setFormData({ company_name: '', job_title: '', platform: '', status: 'Applied', notes: '', application_date: new Date().toISOString().split('T')[0] });
     }
   }, [initialData, isOpen]);
 
   if (!isOpen) return null;
 
-  const handleSubmit = (e: FormEvent) => {
-    e.preventDefault();
-    onSubmit(formData);
-  };
-
+  const handleSubmit = (e: FormEvent) => { e.preventDefault(); onSubmit(formData); };
   const statusOptions = ['Applied', 'Screening', 'Interview HR', 'Interview User', 'Technical Test', 'Offer', 'Rejected'];
 
   const setDateQuick = (daysAgo: number) => {
@@ -87,33 +67,10 @@ const ApplicationModal = ({ isOpen, onClose, onSubmit, initialData }: {
             </div>
           </div>
           <div className="flex flex-col sm:flex-row gap-4">
-            {/* --- BAGIAN PLATFORM YANG DIPERBARUI --- */}
             <div className="flex-1">
-              <label className="block text-sm font-medium">Platform</label>
-              {/* Tombol Shortcut */}
-              <div className="flex flex-wrap gap-2 mt-2">
-                {platformOptions.map(p => (
-                  <button
-                    key={p}
-                    type="button"
-                    onClick={() => setFormData({ ...formData, platform: p })}
-                    className={`px-3 py-1 text-sm rounded-full border ${formData.platform === p ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-transparent border-gray-300 dark:border-gray-600'}`}
-                  >
-                    {p}
-                  </button>
-                ))}
-              </div>
-              {/* Input Kustom */}
-              <input
-                id="platform_custom"
-                type="text"
-                placeholder="Atau tulis platform lain..."
-                value={formData.platform}
-                onChange={(e) => setFormData({ ...formData, platform: e.target.value })}
-                className="mt-2 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:border-gray-600"
-              />
+              <label htmlFor="platform" className="block text-sm font-medium">Platform</label>
+              <input id="platform" type="text" value={formData.platform || ''} onChange={(e) => setFormData({ ...formData, platform: e.target.value })} className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:border-gray-600"/>
             </div>
-            {/* ------------------------------------- */}
             <div className="flex-1">
               <label htmlFor="status" className="block text-sm font-medium">Status</label>
               <select id="status" value={formData.status} onChange={(e) => setFormData({ ...formData, status: e.target.value })} className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:border-gray-600">
@@ -131,18 +88,15 @@ const ApplicationModal = ({ isOpen, onClose, onSubmit, initialData }: {
   );
 };
 
-// ... sisanya (komponen StatusDropdown dan DashboardPage) tidak perlu diubah ...
-
-
-// --- Komponen StatusDropdown (dengan perbaikan) ---
+// --- Komponen Dropdown ---
 const StatusDropdown = ({ app, onStatusChange, isOpen, onToggle }: {
-  app: JobApplication,
-  onStatusChange: (id: string, newStatus: string) => void,
-  isOpen: boolean,
-  onToggle: () => void
+  app: JobApplication;
+  onStatusChange: (id: string, newStatus: string) => void;
+  isOpen: boolean;
+  onToggle: () => void;
 }) => {
   const statusOptions = ['Applied', 'Screening', 'Interview HR', 'Interview User', 'Technical Test', 'Offer', 'Rejected'];
-  const dropdownRef = useRef<HTMLDivElement>(null); // Untuk mendeteksi klik di luar
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -150,11 +104,9 @@ const StatusDropdown = ({ app, onStatusChange, isOpen, onToggle }: {
         onToggle();
       }
     };
-
     if (isOpen) {
       document.addEventListener('mousedown', handleClickOutside);
     }
-    
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
@@ -200,7 +152,6 @@ export default function DashboardPage() {
   const [applications, setApplications] = useState<JobApplication[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingApp, setEditingApp] = useState<JobApplication | null>(null);
   const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
@@ -210,51 +161,48 @@ export default function DashboardPage() {
     if (!token) { window.location.href = '/'; return; }
     try {
       setIsLoading(true);
-      const response = await fetch('http://localhost:3000/api/tracker', { headers: { 'Authorization': `Bearer ${token}` } });
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/tracker`, { headers: { 'Authorization': `Bearer ${token}` } });
       if (!response.ok) throw new Error('Gagal mengambil data lamaran');
       const data: JobApplication[] = await response.json();
       setApplications(data);
-    } catch (err: any) { setError(err.message); } 
+    } catch (err) { // PERBAIKAN 2
+      if (err instanceof Error) setError(err.message);
+      else setError('Terjadi kesalahan tidak diketahui');
+    } 
     finally { setIsLoading(false); }
   };
 
   useEffect(() => { fetchApplications(); }, []);
-
-  const handleLogout = () => {
-    localStorage.removeItem('accessToken');
-    window.location.href = '/';
-  };
-
-  const handleOpenAddModal = () => {
-    setEditingApp(null);
-    setIsModalOpen(true);
-  };
-
-  const handleOpenEditModal = (app: JobApplication) => {
-    setEditingApp(app);
-    setIsModalOpen(true);
-  };
+  const handleLogout = () => { localStorage.removeItem('accessToken'); window.location.href = '/'; };
+  const handleOpenAddModal = () => { setEditingApp(null); setIsModalOpen(true); };
+  const handleOpenEditModal = (app: JobApplication) => { setEditingApp(app); setIsModalOpen(true); };
 
   const handleFormSubmit = async (formData: ApplicationFormData) => {
     const token = localStorage.getItem('accessToken');
     const method = editingApp ? 'PUT' : 'POST';
-    const url = editingApp ? `http://localhost:3000/api/tracker/${editingApp.id}` : 'http://localhost:3000/api/tracker';
+    const url = editingApp ? `${process.env.NEXT_PUBLIC_API_URL}/api/tracker/${editingApp.id}` : `${process.env.NEXT_PUBLIC_API_URL}/api/tracker`;
     try {
       const response = await fetch(url, { method, headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }, body: JSON.stringify(formData) });
       if (!response.ok) { const errData = await response.json(); throw new Error(errData.message || 'Gagal menyimpan data'); }
       setIsModalOpen(false);
       fetchApplications();
-    } catch (error: any) { alert(error.message); }
+    } catch (error) { // PERBAIKAN 3
+      if (error instanceof Error) alert(error.message);
+      else alert('Terjadi kesalahan tidak diketahui');
+    }
   };
 
   const handleDelete = async (id: string) => {
     if (!window.confirm("Apakah Anda yakin ingin menghapus lamaran ini?")) { return; }
     const token = localStorage.getItem('accessToken');
     try {
-      const response = await fetch(`http://localhost:3000/api/tracker/${id}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } });
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/tracker/${id}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } });
       if (!response.ok) throw new Error('Gagal menghapus lamaran');
       fetchApplications();
-    } catch (error: any) { alert(error.message); }
+    } catch (error) { // PERBAIKAN 4
+      if (error instanceof Error) alert(error.message);
+      else alert('Terjadi kesalahan tidak diketahui');
+    }
   };
   
   const handleQuickStatusUpdate = async (id: string, newStatus: string) => {
@@ -262,7 +210,7 @@ export default function DashboardPage() {
     const currentApp = applications.find(app => app.id === id);
     if (!currentApp) return;
     try {
-      const response = await fetch(`http://localhost:3000/api/tracker/${id}`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/tracker/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify({ ...currentApp, status: newStatus }),
@@ -270,14 +218,13 @@ export default function DashboardPage() {
       if (!response.ok) throw new Error('Gagal memperbarui status');
       fetchApplications();
       setOpenDropdownId(null);
-    } catch (error: any) {
-      alert(error.message);
+    } catch (error) { // PERBAIKAN 5
+      if (error instanceof Error) alert(error.message);
+      else alert('Terjadi kesalahan tidak diketahui');
     }
   };
 
-  const handleDropdownToggle = (appId: string) => {
-    setOpenDropdownId(prevId => (prevId === appId ? null : appId));
-  };
+  const handleDropdownToggle = (appId: string) => { setOpenDropdownId(prevId => (prevId === appId ? null : appId)); };
 
   return (
     <>
