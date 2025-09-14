@@ -20,6 +20,8 @@ interface JobApplication {
 type ApplicationFormData = Omit<JobApplication, 'id' | 'user_id'>;
 
 // --- Komponen Modal (Tidak ada perubahan) ---
+// Ganti komponen ApplicationModal yang lama dengan yang ini
+
 const ApplicationModal = ({ isOpen, onClose, onSubmit, initialData }: {
   isOpen: boolean;
   onClose: () => void;
@@ -27,9 +29,12 @@ const ApplicationModal = ({ isOpen, onClose, onSubmit, initialData }: {
   initialData?: JobApplication | null;
 }) => {
   const [formData, setFormData] = useState<ApplicationFormData>({
-    company_name: '', job_title: '', platform: '', status: 'Applied', notes: '', 
+    company_name: '', job_title: '', platform: '', status: 'Applied', notes: '',
     application_date: new Date().toISOString().split('T')[0]
   });
+
+  // Pindahkan daftar platform ke sini agar bisa diakses
+  const platformOptions = ['LinkedIn', 'JobStreet', 'Glints', 'Website'];
 
   useEffect(() => {
     if (initialData) {
@@ -40,13 +45,18 @@ const ApplicationModal = ({ isOpen, onClose, onSubmit, initialData }: {
         application_date: new Date(initialData.application_date).toISOString().split('T')[0]
       });
     } else {
-      setFormData({ company_name: '', job_title: '', platform: '', status: 'Applied', notes: '', application_date: new Date().toISOString().split('T')[0] });
+      // Reset form dan set platform default ke pilihan pertama
+      setFormData({ company_name: '', job_title: '', platform: 'LinkedIn', status: 'Applied', notes: '', application_date: new Date().toISOString().split('T')[0] });
     }
   }, [initialData, isOpen]);
 
   if (!isOpen) return null;
 
-  const handleSubmit = (e: FormEvent) => { e.preventDefault(); onSubmit(formData); };
+  const handleSubmit = (e: FormEvent) => {
+    e.preventDefault();
+    onSubmit(formData);
+  };
+
   const statusOptions = ['Applied', 'Screening', 'Interview HR', 'Interview User', 'Technical Test', 'Offer', 'Rejected'];
 
   const setDateQuick = (daysAgo: number) => {
@@ -77,10 +87,33 @@ const ApplicationModal = ({ isOpen, onClose, onSubmit, initialData }: {
             </div>
           </div>
           <div className="flex flex-col sm:flex-row gap-4">
+            {/* --- BAGIAN PLATFORM YANG DIPERBARUI --- */}
             <div className="flex-1">
-              <label htmlFor="platform" className="block text-sm font-medium">Platform</label>
-              <input id="platform" type="text" value={formData.platform || ''} onChange={(e) => setFormData({ ...formData, platform: e.target.value })} className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:border-gray-600"/>
+              <label className="block text-sm font-medium">Platform</label>
+              {/* Tombol Shortcut */}
+              <div className="flex flex-wrap gap-2 mt-2">
+                {platformOptions.map(p => (
+                  <button
+                    key={p}
+                    type="button"
+                    onClick={() => setFormData({ ...formData, platform: p })}
+                    className={`px-3 py-1 text-sm rounded-full border ${formData.platform === p ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-transparent border-gray-300 dark:border-gray-600'}`}
+                  >
+                    {p}
+                  </button>
+                ))}
+              </div>
+              {/* Input Kustom */}
+              <input
+                id="platform_custom"
+                type="text"
+                placeholder="Atau tulis platform lain..."
+                value={formData.platform}
+                onChange={(e) => setFormData({ ...formData, platform: e.target.value })}
+                className="mt-2 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:border-gray-600"
+              />
             </div>
+            {/* ------------------------------------- */}
             <div className="flex-1">
               <label htmlFor="status" className="block text-sm font-medium">Status</label>
               <select id="status" value={formData.status} onChange={(e) => setFormData({ ...formData, status: e.target.value })} className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:border-gray-600">
@@ -97,6 +130,8 @@ const ApplicationModal = ({ isOpen, onClose, onSubmit, initialData }: {
     </div>
   );
 };
+
+// ... sisanya (komponen StatusDropdown dan DashboardPage) tidak perlu diubah ...
 
 
 // --- Komponen StatusDropdown (dengan perbaikan) ---
