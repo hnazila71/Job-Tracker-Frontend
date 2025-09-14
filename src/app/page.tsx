@@ -3,13 +3,13 @@
 "use client";
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation'; // <-- Impor useRouter
+import { useRouter } from 'next/navigation';
 
 export default function HomePage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [message, setMessage] = useState('');
-  const router = useRouter(); // <-- Inisialisasi router
+  const router = useRouter();
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -27,17 +27,13 @@ export default function HomePage() {
       if (!response.ok) {
         throw new Error(data.message || 'Terjadi kesalahan');
       }
-
-      // --- PERUBAHAN UTAMA ADA DI SINI ---
       
-      // 1. Simpan token ke localStorage
       if (data.accessToken) {
         localStorage.setItem('accessToken', data.accessToken);
       }
       
       setMessage('Login berhasil! Mengarahkan ke dashboard...');
 
-      // 2. Arahkan (redirect) ke halaman dashboard setelah 1 detik
       setTimeout(() => {
         router.push('/dashboard');
       }, 1000);
@@ -49,12 +45,14 @@ export default function HomePage() {
   };
 
   return (
-    <main className="flex items-center justify-center min-h-screen bg-gray-100">
-      <div className="w-full max-w-md p-8 space-y-8 bg-white rounded-lg shadow-md">
-        <h1 className="text-2xl font-bold text-center text-gray-900">
+    <main className="flex items-center justify-center min-h-screen bg-gray-100 dark:bg-gray-900">
+      <div className="w-full max-w-md p-8 space-y-8 bg-white rounded-lg shadow-md dark:bg-gray-800">
+        {/* Kelas warna teks eksplisit dihapus dari sini */}
+        <h1 className="text-2xl font-bold text-center">
           Selamat Datang di Job Tracker
         </h1>
-        <p className="text-center text-gray-600">
+        {/* Dan dari sini */}
+        <p className="text-center">
           Silakan masuk untuk melanjutkan
         </p>
 
@@ -67,7 +65,7 @@ export default function HomePage() {
               name="email"
               type="email"
               required
-              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400"
               placeholder="Alamat Email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
@@ -82,7 +80,7 @@ export default function HomePage() {
               name="password"
               type="password"
               required
-              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400"
               placeholder="Password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
