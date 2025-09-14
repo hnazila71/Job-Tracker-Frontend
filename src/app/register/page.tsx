@@ -1,46 +1,46 @@
-// src/app/page.tsx
+// src/app/register/page.tsx
 
 "use client";
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link'; // <-- Impor Link
+import Link from 'next/link';
 
-export default function HomePage() {
+export default function RegisterPage() {
+  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [message, setMessage] = useState('');
+  const [isSuccess, setIsSuccess] = useState(false);
   const router = useRouter();
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setMessage('');
+    setIsSuccess(false);
 
     try {
-      const response = await fetch('http://localhost:3000/api/auth/login', {
+      const response = await fetch('http://localhost:3000/api/users/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ name, email, password }),
       });
 
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || 'Terjadi kesalahan');
+        throw new Error(data.message || 'Gagal mendaftar');
       }
-      
-      if (data.accessToken) {
-        localStorage.setItem('accessToken', data.accessToken);
-      }
-      
-      setMessage('Login berhasil! Mengarahkan ke dashboard...');
+
+      setMessage('Pendaftaran berhasil! Anda akan diarahkan ke halaman login...');
+      setIsSuccess(true);
 
       setTimeout(() => {
-        router.push('/dashboard');
-      }, 1000);
+        router.push('/'); // Arahkan ke halaman login
+      }, 2000);
 
     } catch (error: any) {
-      console.error('Error saat login:', error);
+      console.error('Error saat mendaftar:', error);
       setMessage(error.message);
     }
   };
@@ -49,21 +49,30 @@ export default function HomePage() {
     <main className="flex items-center justify-center min-h-screen bg-gray-100 dark:bg-gray-900">
       <div className="w-full max-w-md p-8 space-y-8 bg-white rounded-lg shadow-md dark:bg-gray-800">
         <h1 className="text-2xl font-bold text-center">
-          Selamat Datang di Job Tracker
+          Buat Akun Baru
         </h1>
         <p className="text-center">
-          Silakan masuk untuk melanjutkan
+          Daftar untuk mulai melacak lamaran kerja Anda.
         </p>
 
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+          {/* Input Nama */}
+          <div>
+            <label htmlFor="name" className="sr-only">Nama Lengkap</label>
+            <input
+              id="name" name="name" type="text" required
+              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400"
+              placeholder="Nama Lengkap"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+            />
+          </div>
+
           {/* Input Email */}
           <div>
             <label htmlFor="email" className="sr-only">Alamat Email</label>
             <input
-              id="email"
-              name="email"
-              type="email"
-              required
+              id="email" name="email" type="email" required
               className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400"
               placeholder="Alamat Email"
               value={email}
@@ -75,10 +84,7 @@ export default function HomePage() {
           <div>
             <label htmlFor="password" className="sr-only">Password</label>
             <input
-              id="password"
-              name="password"
-              type="password"
-              required
+              id="password" name="password" type="password" required
               className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400"
               placeholder="Password"
               value={password}
@@ -88,30 +94,28 @@ export default function HomePage() {
 
           {/* Tempat untuk menampilkan pesan */}
           {message && (
-            <p className={`text-sm text-center ${message.includes('berhasil') ? 'text-green-600' : 'text-red-600'}`}>
+            <p className={`text-sm text-center ${isSuccess ? 'text-green-600' : 'text-red-600'}`}>
               {message}
             </p>
           )}
 
-          {/* Tombol Login */}
+          {/* Tombol Daftar */}
           <div>
             <button
               type="submit"
               className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
             >
-              Masuk
+              Daftar
             </button>
           </div>
         </form>
-        
-        {/* --- LINK BARU KE HALAMAN REGISTER --- */}
+
         <p className="text-center text-sm">
-          Belum punya akun?{' '}
-          <Link href="/register" className="font-medium text-indigo-600 dark:text-indigo-400 hover:underline">
-            Daftar di sini
+          Sudah punya akun?{' '}
+          <Link href="/" className="font-medium text-indigo-600 dark:text-indigo-400 hover:underline">
+            Masuk di sini
           </Link>
         </p>
-        {/* ------------------------------------ */}
       </div>
     </main>
   );
