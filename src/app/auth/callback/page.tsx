@@ -1,10 +1,11 @@
 // src/app/auth/callback/page.tsx
+
 "use client";
 
-import { useEffect } from 'react';
+import { useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 
-export default function AuthCallbackPage() {
+function AuthCallback() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -30,5 +31,13 @@ export default function AuthCallbackPage() {
     <div className="flex items-center justify-center min-h-screen">
       <p>Mengarahkan Anda...</p>
     </div>
+  );
+}
+
+export default function AuthCallbackPage() {
+  return (
+    <Suspense fallback={<div className="flex items-center justify-center min-h-screen">Loading...</div>}>
+      <AuthCallback />
+    </Suspense>
   );
 }
