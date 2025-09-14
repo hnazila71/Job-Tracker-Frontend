@@ -14,13 +14,12 @@ interface JobApplication {
   platform?: string;
   notes?: string;
 }
+
+// --- PERBAIKAN TIPE DATA DI SINI ---
+// Kita izinkan 'application_date' ada di dalam tipe form
 type ApplicationFormData = Omit<JobApplication, 'id' | 'user_id'>;
 
 // --- Komponen Modal (Tidak ada perubahan) ---
-// Ganti komponen ApplicationModal yang lama dengan yang ini
-
-// Ganti komponen ApplicationModal yang lama dengan yang ini
-
 const ApplicationModal = ({ isOpen, onClose, onSubmit, initialData }: {
   isOpen: boolean;
   onClose: () => void;
@@ -28,12 +27,9 @@ const ApplicationModal = ({ isOpen, onClose, onSubmit, initialData }: {
   initialData?: JobApplication | null;
 }) => {
   const [formData, setFormData] = useState<ApplicationFormData>({
-    company_name: '', job_title: '', platform: '', status: 'Applied', notes: '',
+    company_name: '', job_title: '', platform: '', status: 'Applied', notes: '', 
     application_date: new Date().toISOString().split('T')[0]
   });
-
-  // Pindahkan daftar platform ke sini agar bisa diakses
-  const platformOptions = ['LinkedIn', 'JobStreet', 'Glints', 'Website'];
 
   useEffect(() => {
     if (initialData) {
@@ -44,18 +40,13 @@ const ApplicationModal = ({ isOpen, onClose, onSubmit, initialData }: {
         application_date: new Date(initialData.application_date).toISOString().split('T')[0]
       });
     } else {
-      // Reset form dan set platform default ke pilihan pertama
-      setFormData({ company_name: '', job_title: '', platform: 'LinkedIn', status: 'Applied', notes: '', application_date: new Date().toISOString().split('T')[0] });
+      setFormData({ company_name: '', job_title: '', platform: '', status: 'Applied', notes: '', application_date: new Date().toISOString().split('T')[0] });
     }
   }, [initialData, isOpen]);
 
   if (!isOpen) return null;
 
-  const handleSubmit = (e: FormEvent) => {
-    e.preventDefault();
-    onSubmit(formData);
-  };
-
+  const handleSubmit = (e: FormEvent) => { e.preventDefault(); onSubmit(formData); };
   const statusOptions = ['Applied', 'Screening', 'Interview HR', 'Interview User', 'Technical Test', 'Offer', 'Rejected'];
 
   const setDateQuick = (daysAgo: number) => {
@@ -86,33 +77,10 @@ const ApplicationModal = ({ isOpen, onClose, onSubmit, initialData }: {
             </div>
           </div>
           <div className="flex flex-col sm:flex-row gap-4">
-            {/* --- BAGIAN PLATFORM YANG DIPERBARUI --- */}
             <div className="flex-1">
-              <label className="block text-sm font-medium">Platform</label>
-              {/* Tombol Shortcut */}
-              <div className="flex flex-wrap gap-2 mt-2">
-                {platformOptions.map(p => (
-                  <button
-                    key={p}
-                    type="button"
-                    onClick={() => setFormData({ ...formData, platform: p })}
-                    className={`px-3 py-1 text-sm rounded-full border ${formData.platform === p ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-transparent border-gray-300 dark:border-gray-600'}`}
-                  >
-                    {p}
-                  </button>
-                ))}
-              </div>
-              {/* Input Kustom */}
-              <input
-                id="platform_custom"
-                type="text"
-                placeholder="Atau tulis platform lain..."
-                value={formData.platform}
-                onChange={(e) => setFormData({ ...formData, platform: e.target.value })}
-                className="mt-2 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:border-gray-600"
-              />
+              <label htmlFor="platform" className="block text-sm font-medium">Platform</label>
+              <input id="platform" type="text" value={formData.platform || ''} onChange={(e) => setFormData({ ...formData, platform: e.target.value })} className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:border-gray-600"/>
             </div>
-            {/* ------------------------------------- */}
             <div className="flex-1">
               <label htmlFor="status" className="block text-sm font-medium">Status</label>
               <select id="status" value={formData.status} onChange={(e) => setFormData({ ...formData, status: e.target.value })} className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:border-gray-600">
@@ -130,12 +98,6 @@ const ApplicationModal = ({ isOpen, onClose, onSubmit, initialData }: {
   );
 };
 
-// ... sisanya (komponen StatusDropdown dan DashboardPage) tidak perlu diubah ...
-
-// --- Komponen StatusDropdown (dengan perubahan) ---
-// Ganti komponen StatusDropdown yang lama dengan yang ini
-// Pastikan useRef sudah diimpor di baris paling atas
-// import { useEffect, useState, FormEvent, ChangeEvent, useRef } from 'react';
 
 // --- Komponen StatusDropdown (dengan perbaikan) ---
 const StatusDropdown = ({ app, onStatusChange, isOpen, onToggle }: {
@@ -145,33 +107,26 @@ const StatusDropdown = ({ app, onStatusChange, isOpen, onToggle }: {
   onToggle: () => void
 }) => {
   const statusOptions = ['Applied', 'Screening', 'Interview HR', 'Interview User', 'Technical Test', 'Offer', 'Rejected'];
-  const dropdownRef = useRef<HTMLDivElement>(null); // 1. Buat penanda untuk dropdown
+  const dropdownRef = useRef<HTMLDivElement>(null); // Untuk mendeteksi klik di luar
 
-  // 2. Efek untuk mendeteksi klik di luar
   useEffect(() => {
-    // Fungsi yang akan dijalankan saat ada klik
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        // Jika dropdown terbuka dan klik terjadi di luar area dropdown
-        onToggle(); // Panggil fungsi untuk menutup
+        onToggle();
       }
     };
 
-    // Tambahkan pendengar event saat dropdown terbuka
     if (isOpen) {
       document.addEventListener('mousedown', handleClickOutside);
     }
-
-    // Fungsi cleanup: hapus pendengar event saat komponen tidak lagi ditampilkan
-    // Ini sangat penting untuk performa
+    
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, [isOpen, onToggle]); // Efek ini akan berjalan lagi jika isOpen berubah
+  }, [isOpen, onToggle]);
 
   const handleSelect = (newStatus: string) => {
     onStatusChange(app.id, newStatus);
-    // onToggle() tidak perlu dipanggil di sini karena sudah ditangani oleh logika di atas dan di `handleClickOutside`
   };
   
   const getStatusColor = (status: string) => {
@@ -185,7 +140,6 @@ const StatusDropdown = ({ app, onStatusChange, isOpen, onToggle }: {
   };
 
   return (
-    // 3. Pasang penanda ke elemen div utama dropdown
     <div className="relative" ref={dropdownRef}>
       <button 
         onClick={onToggle} 
@@ -214,12 +168,9 @@ export default function DashboardPage() {
   
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingApp, setEditingApp] = useState<JobApplication | null>(null);
-
-  // --- State baru untuk mengontrol dropdown mana yang terbuka ---
   const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
-  // -----------------------------------------------------------
 
-  const fetchApplications = async () => { /* ... (Fungsi ini tetap sama) ... */ 
+  const fetchApplications = async () => {
     const token = localStorage.getItem('accessToken');
     if (!token) { window.location.href = '/'; return; }
     try {
@@ -234,22 +185,22 @@ export default function DashboardPage() {
 
   useEffect(() => { fetchApplications(); }, []);
 
-  const handleLogout = () => { /* ... (Fungsi ini tetap sama) ... */
+  const handleLogout = () => {
     localStorage.removeItem('accessToken');
     window.location.href = '/';
   };
 
-  const handleOpenAddModal = () => { /* ... (Fungsi ini tetap sama) ... */
+  const handleOpenAddModal = () => {
     setEditingApp(null);
     setIsModalOpen(true);
   };
 
-  const handleOpenEditModal = (app: JobApplication) => { /* ... (Fungsi ini tetap sama) ... */
+  const handleOpenEditModal = (app: JobApplication) => {
     setEditingApp(app);
     setIsModalOpen(true);
   };
 
-  const handleFormSubmit = async (formData: ApplicationFormData) => { /* ... (Fungsi ini tetap sama) ... */
+  const handleFormSubmit = async (formData: ApplicationFormData) => {
     const token = localStorage.getItem('accessToken');
     const method = editingApp ? 'PUT' : 'POST';
     const url = editingApp ? `http://localhost:3000/api/tracker/${editingApp.id}` : 'http://localhost:3000/api/tracker';
@@ -261,7 +212,7 @@ export default function DashboardPage() {
     } catch (error: any) { alert(error.message); }
   };
 
-  const handleDelete = async (id: string) => { /* ... (Fungsi ini tetap sama) ... */
+  const handleDelete = async (id: string) => {
     if (!window.confirm("Apakah Anda yakin ingin menghapus lamaran ini?")) { return; }
     const token = localStorage.getItem('accessToken');
     try {
@@ -271,7 +222,7 @@ export default function DashboardPage() {
     } catch (error: any) { alert(error.message); }
   };
   
-  const handleQuickStatusUpdate = async (id: string, newStatus: string) => { /* ... (Fungsi ini tetap sama) ... */
+  const handleQuickStatusUpdate = async (id: string, newStatus: string) => {
     const token = localStorage.getItem('accessToken');
     const currentApp = applications.find(app => app.id === id);
     if (!currentApp) return;
@@ -283,12 +234,13 @@ export default function DashboardPage() {
       });
       if (!response.ok) throw new Error('Gagal memperbarui status');
       fetchApplications();
-    } catch (error: any) { alert(error.message); }
+      setOpenDropdownId(null);
+    } catch (error: any) {
+      alert(error.message);
+    }
   };
 
-  // --- Fungsi baru untuk mengontrol buka/tutup dropdown ---
   const handleDropdownToggle = (appId: string) => {
-    // Jika dropdown yang diklik sudah terbuka, tutup. Jika belum, buka.
     setOpenDropdownId(prevId => (prevId === appId ? null : appId));
   };
 
@@ -328,8 +280,8 @@ export default function DashboardPage() {
                         <StatusDropdown 
                           app={app} 
                           onStatusChange={handleQuickStatusUpdate}
-                          isOpen={openDropdownId === app.id} // Kirim status buka/tutup
-                          onToggle={() => handleDropdownToggle(app.id)} // Kirim fungsi untuk buka/tutup
+                          isOpen={openDropdownId === app.id}
+                          onToggle={() => handleDropdownToggle(app.id)}
                         />
                         <button onClick={() => handleOpenEditModal(app)} className="px-3 py-1 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700">Edit</button>
                         <button onClick={() => handleDelete(app.id)} className="px-3 py-1 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700">Delete</button>

@@ -4,7 +4,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link'; // <-- Impor Link
+import Link from 'next/link';
 
 export default function HomePage() {
   const [email, setEmail] = useState('');
@@ -17,7 +17,7 @@ export default function HomePage() {
     setMessage('');
 
     try {
-      const response = await fetch('http://localhost:3000/api/auth/login', {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
@@ -39,9 +39,13 @@ export default function HomePage() {
         router.push('/dashboard');
       }, 1000);
 
-    } catch (error: any) {
+    } catch (error) { // <-- PERBAIKAN DI SINI
       console.error('Error saat login:', error);
-      setMessage(error.message);
+      if (error instanceof Error) {
+        setMessage(error.message);
+      } else {
+        setMessage('Terjadi kesalahan yang tidak diketahui');
+      }
     }
   };
 
@@ -56,7 +60,6 @@ export default function HomePage() {
         </p>
 
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          {/* Input Email */}
           <div>
             <label htmlFor="email" className="sr-only">Alamat Email</label>
             <input
@@ -70,8 +73,6 @@ export default function HomePage() {
               onChange={(e) => setEmail(e.target.value)}
             />
           </div>
-
-          {/* Input Password */}
           <div>
             <label htmlFor="password" className="sr-only">Password</label>
             <input
@@ -85,15 +86,11 @@ export default function HomePage() {
               onChange={(e) => setPassword(e.target.value)}
             />
           </div>
-
-          {/* Tempat untuk menampilkan pesan */}
           {message && (
             <p className={`text-sm text-center ${message.includes('berhasil') ? 'text-green-600' : 'text-red-600'}`}>
               {message}
             </p>
           )}
-
-          {/* Tombol Login */}
           <div>
             <button
               type="submit"
@@ -103,15 +100,12 @@ export default function HomePage() {
             </button>
           </div>
         </form>
-        
-        {/* --- LINK BARU KE HALAMAN REGISTER --- */}
         <p className="text-center text-sm">
           Belum punya akun?{' '}
           <Link href="/register" className="font-medium text-indigo-600 dark:text-indigo-400 hover:underline">
             Daftar di sini
           </Link>
         </p>
-        {/* ------------------------------------ */}
       </div>
     </main>
   );
