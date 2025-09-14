@@ -10,7 +10,7 @@ export default function HomePage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [message, setMessage] = useState('');
-  const [isLoading, setIsLoading] = useState(false); // State untuk loading
+  const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -70,7 +70,7 @@ export default function HomePage() {
         setMessage('Terjadi kesalahan yang tidak diketahui');
       }
     } finally {
-        setIsLoading(false); // Hentikan loading
+        setIsLoading(false);
     }
   };
 
