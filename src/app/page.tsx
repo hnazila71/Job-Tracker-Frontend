@@ -134,6 +134,13 @@ export default function HomePage() {
             Daftar di sini
           </Link>
         </p>
+        <a
+  href={`${process.env.NEXT_PUBLIC_API_URL}/api/auth/google`}
+  className="w-full flex items-center justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium bg-white hover:bg-gray-50 dark:bg-gray-800 dark:hover:bg-gray-700"
+>
+  {/* Anda bisa menambahkan ikon Google di sini */}
+  <span className="ml-2">Masuk dengan Google</span>
+</a>
       </div>
     </main>
   );
